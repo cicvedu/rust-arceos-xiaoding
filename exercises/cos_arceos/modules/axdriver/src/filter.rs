@@ -4,7 +4,7 @@ use crate::virtio::VirtIoHalImpl;
 
 use super::prelude::*;
 use cfg_if::cfg_if;
-use driver_virtio::VirtIoNetDev;
+
 
 
 pub struct NetFilter<T> {
@@ -22,7 +22,7 @@ cfg_if! {
 
 cfg_if! {
     if #[cfg(net_dev = "virtio-net")] {
-        impl BaseDriverOps for NetFilter<VirtIoNetDev<VirtIoHalImpl, VirtIoTransport, 64>> {
+        impl BaseDriverOps for NetFilter<driver_virtio::VirtIoNetDev<VirtIoHalImpl, VirtIoTransport, 64>> {
             /// The name of the device.
             fn device_name(&self) -> &str {
                 "net-filter"
@@ -35,7 +35,7 @@ cfg_if! {
 
         }
 
-        impl NetDriverOps for NetFilter<VirtIoNetDev<VirtIoHalImpl, VirtIoTransport, 64>> {
+        impl NetDriverOps for NetFilter<driver_virtio::VirtIoNetDev<VirtIoHalImpl, VirtIoTransport, 64>> {
             fn mac_address(&self) -> driver_net::EthernetAddress {
                 self.inner.mac_address()
             }
