@@ -164,9 +164,40 @@ impl VfsNodeOps for DirNode {
             self.remove_node(name)
         }
     }
+    
+    /// A minimum version rename().
+    /// to pass the exercise, we support rename("/tmp/f1", "/tmp/f2") only
+    /// 1. we assume "src" exists
+    /// 2. we assume "dst" locates in the same directory
+    fn rename(&self, src: &str, dst: &str) -> VfsResult {
+        log::debug!("rename \"{}\" to \"{}\"", src, dst);
+        // rename
+        let (_dst_name, dst_rest) = split_path(dst);
+        let (src_name, _src_rest) = split_path(src); // src_name: tmp, src_rest: f1
+        if self.exist(src_name) {
+            let src_node = self
+                .children
+                .read()
+                .get(src_name)
+                .cloned()
+                .unwrap();
+            if src_node.get_attr().unwrap().is_file() {
+                self
+                .children
+                .write()
+                .insert(String::from(dst_rest.unwrap()), src_node);
 
-    fn rename(&self, _src: &str, _dst: &str) -> VfsResult {
-        todo!("Implement rename for ramfs!");
+                self
+                .children
+                .write()
+                .remove(src_name).unwrap();
+                return Ok(())
+            } else {
+                return Err(VfsError::IsADirectory)
+            }
+        } else {
+            return Err(VfsError::InvalidInput)
+        }
     }
 
     axfs_vfs::impl_vfs_dir_default! {}
